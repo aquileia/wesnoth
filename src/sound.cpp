@@ -16,6 +16,7 @@
 
 #include "config.hpp"
 #include "filesystem.hpp"
+#include "filesystem_sdl.hpp"
 #include "game_preferences.hpp"
 #include "log.hpp"
 #include "serialization/string_utils.hpp"
@@ -487,7 +488,8 @@ static void play_new_music()
 	std::map<std::string,Mix_Music*>::const_iterator itor = music_cache.find(filename);
 	if(itor == music_cache.end()) {
 		LOG_AUDIO << "attempting to insert track '" << filename << "' into cache\n";
-		Mix_Music* const music = Mix_LoadMUS(filename.c_str());
+		//filesystem::RWops rw = filesystem::load_RWops(filename);
+		Mix_Music* const music = Mix_LoadMUS(filename.c_str());//Mix_LoadMUS_RW(*rw); // LoadMUS_RW seems broken
 		if(music == NULL) {
 			ERR_AUDIO << "Could not load music file '" << filename << "': "
 					  << Mix_GetError() << "\n";
@@ -709,7 +711,8 @@ static Mix_Chunk* load_chunk(const std::string& file, channel_group group)
 		std::string const &filename = get_binary_file_location("sounds", file);
 
 		if (!filename.empty()) {
-			temp_chunk.set_data(Mix_LoadWAV(filename.c_str()));
+			filesystem::RWops rw = filesystem::load_RWops(filename);
+			temp_chunk.set_data(Mix_LoadWAV_RW(*rw, false)); // don't free
 		} else {
 			ERR_AUDIO << "Could not load sound file '" << file << "'.\n";
 			throw chunk_load_exception();
