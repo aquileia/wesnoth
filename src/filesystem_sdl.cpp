@@ -19,14 +19,17 @@
 
 namespace filesystem {
 RWops::RWops(const std::ostringstream &in) :
-	buffer(in.str()),
-	rwops(SDL_RWFromConstMem(buffer.data(), buffer.size()))
+	buffer_(new std::string(in.str())),
+	rwops_(SDL_RWFromConstMem(buffer_->data(), buffer_->size()))
 {
+	//const std::string tmp = in.str();
+	//buffer_ = boost::shared_array<char>(tmp.data(), length_);
+	//rwops_ = SDL_RWFromConstMem(buffer_.get(), length_);
 }
 
 RWops::RWops(const RWops &in) :
-	buffer(in.buffer),
-	rwops(SDL_RWFromConstMem(buffer.data(), buffer.size()))
+	buffer_(in.buffer_),
+	rwops_(in.rwops_)
 {
 }
 
@@ -37,11 +40,12 @@ RWops& RWops::operator=(const RWops &in) {
 }
 
 SDL_RWops* RWops::operator*() {
-	return rwops;
+	return rwops_;
 }
 
 RWops::~RWops() {
-	SDL_FreeRW(rwops);
+	if(buffer_.unique())
+		SDL_FreeRW(rwops_);
 }
 
 RWops load_RWops(const std::string &path) {

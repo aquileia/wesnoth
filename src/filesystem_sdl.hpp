@@ -20,6 +20,7 @@
 #ifndef FILESYSTEM_SDL_HPP_INCLUDED
 #define FILESYSTEM_SDL_HPP_INCLUDED
 
+#include <boost/smart_ptr/shared_ptr.hpp>
 #include <sstream>
 #include <string>
 
@@ -37,8 +38,8 @@ namespace filesystem {
 		~RWops();
 	private:
 
-		const std::string buffer;
-		SDL_RWops *rwops;
+		boost::shared_ptr<std::string> buffer_;
+		SDL_RWops *rwops_;
 	};
 
 	RWops load_RWops(const std::string &path);

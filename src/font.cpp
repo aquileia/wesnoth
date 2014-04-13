@@ -19,6 +19,7 @@
 
 #include "config.hpp"
 #include "filesystem.hpp"
+#include "filesystem_sdl.hpp"
 #include "font.hpp"
 #include "game_config.hpp"
 #include "log.hpp"
@@ -77,7 +78,8 @@ struct font_id
 	int size;
 };
 
-static std::map<font_id, TTF_Font*> font_table;
+typedef std::pair<TTF_Font*, filesystem::RWops> font_pod;
+static std::map<font_id, font_pod> font_table;
 static std::vector<std::string> font_names;
 
 struct text_chunk
@@ -200,7 +202,7 @@ static std::vector<text_chunk> split_text(std::string const & utf8_text) {
 	return chunks;
 }
 
-static TTF_Font* open_font(const std::string& fname, int size)
+static font_pod open_font(const std::string& fname, int size)
 {
 	std::string name;
 	if(!game_config::path.empty()) {
@@ -211,7 +213,7 @@ static TTF_Font* open_font(const std::string& fname, int size)
 				name = fname;
 				if(!file_exists(name)) {
 					ERR_FT << "Failed opening font: '" << name << "': No such file or directory\n";
-					return NULL;
+					return font_pod(NULL, filesystem::RWops(std::ostringstream()));
 				}
 			}
 		}
@@ -221,46 +223,47 @@ static TTF_Font* open_font(const std::string& fname, int size)
 		if(!file_exists(name)) {
 			if(!file_exists(fname)) {
 				ERR_FT << "Failed opening font: '" << name << "': No such file or directory\n";
-				return NULL;
+				return font_pod(NULL, filesystem::RWops(std::ostringstream()));
 			}
 			name = fname;
 		}
 	}
 
-	TTF_Font* font = TTF_OpenFont(name.c_str(),size);
+	filesystem::RWops rw = filesystem::load_RWops(name);
+	TTF_Font* font = TTF_OpenFontRW(*rw, false, size); // don't close
 	if(font == NULL) {
 		ERR_FT << "Failed opening font: TTF_OpenFont: " << TTF_GetError() << "\n";
-		return NULL;
+		return font_pod(NULL, rw);
 	}
 
-	return font;
+	return font_pod(font, rw);
 }
 
 static TTF_Font* get_font(font_id id)
 {
-	const std::map<font_id, TTF_Font*>::iterator it = font_table.find(id);
+	const std::map<font_id, font_pod>::iterator it = font_table.find(id);
 	if(it != font_table.end())
-		return it->second;
+		return it->second.first;
 
 	if(id.subset < 0 || size_t(id.subset) >= font_names.size())
 		return NULL;
 
-	TTF_Font* font = open_font(font_names[id.subset], id.size);
+	font_pod font = open_font(font_names[id.subset], id.size);
 
-	if(font == NULL)
+	if(font.first == NULL)
 		return NULL;
 
-	TTF_SetFontStyle(font,TTF_STYLE_NORMAL);
+	TTF_SetFontStyle(font.first,TTF_STYLE_NORMAL);
 
 	LOG_FT << "Inserting font...\n";
-	font_table.insert(std::pair<font_id,TTF_Font*>(id, font));
-	return font;
+	font_table.insert(std::pair<font_id,font_pod>(id, font));
+	return font.first;
 }
 
 static void clear_fonts()
 {
-	for(std::map<font_id,TTF_Font*>::iterator i = font_table.begin(); i != font_table.end(); ++i) {
-		TTF_CloseFont(i->second);
+	for(std::map<font_id,font_pod>::iterator i = font_table.begin(); i != font_table.end(); ++i) {
+		TTF_CloseFont(i->second.first);
 	}
 
 	font_table.clear();

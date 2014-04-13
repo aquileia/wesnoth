@@ -145,7 +145,10 @@ private:
 
 std::list< sound_cache_chunk > sound_cache;
 typedef std::list< sound_cache_chunk >::iterator sound_cache_iterator;
-std::map<std::string,Mix_Music*> music_cache;
+// On loading, the music struct takes ownership of the RWops
+// It loads lazily, so the RWops must have the same lifetime
+typedef std::pair<Mix_Music*,filesystem::RWops> music_pod;
+std::map<std::string,music_pod> music_cache;
 
 std::vector<std::string> played_before;
 
@@ -396,9 +399,9 @@ void stop_music() {
 	if(mix_ok) {
 		Mix_HaltMusic();
 
-		std::map<std::string,Mix_Music*>::iterator i;
+		std::map<std::string,music_pod>::iterator i;
 		for(i = music_cache.begin(); i != music_cache.end(); ++i)
-			Mix_FreeMusic(i->second);
+			Mix_FreeMusic(i->second.first);
 		music_cache.clear();
 	}
 }
@@ -485,17 +488,19 @@ static void play_new_music()
 
 	const std::string& filename = current_track.file_path();
 
-	std::map<std::string,Mix_Music*>::const_iterator itor = music_cache.find(filename);
+	std::map<std::string,music_pod>::const_iterator itor = music_cache.find(filename);
 	if(itor == music_cache.end()) {
 		LOG_AUDIO << "attempting to insert track '" << filename << "' into cache\n";
-		//filesystem::RWops rw = filesystem::load_RWops(filename);
-		Mix_Music* const music = Mix_LoadMUS(filename.c_str());//Mix_LoadMUS_RW(*rw); // LoadMUS_RW seems broken
+		// We need to hold on to the actual rw->rwops object
+		// LoadMUS (and OpenFont) hold on to the rw object internally
+		filesystem::RWops rw = filesystem::load_RWops(filename);
+		Mix_Music* const music = Mix_LoadMUS_RW(*rw);
 		if(music == NULL) {
 			ERR_AUDIO << "Could not load music file '" << filename << "': "
 					  << Mix_GetError() << "\n";
 			return;
 		}
-		itor = music_cache.insert(std::pair<std::string,Mix_Music*>(filename,music)).first;
+		itor = music_cache.insert(std::pair<std::string,music_pod>(filename,music_pod(music, rw))).first;
 		last_track=current_track;
 	}
 
@@ -506,7 +511,7 @@ static void play_new_music()
 		fading_time=0;
 	}
 
-	const int res = Mix_FadeInMusic(itor->second, 1, fading_time);
+	const int res = Mix_FadeInMusic(itor->second.first, 1, fading_time);
 	if(res < 0)
 	{
 		ERR_AUDIO << "Could not play music: " << Mix_GetError() << " " << filename <<" \n";
