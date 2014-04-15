@@ -398,6 +398,14 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\src\filesystem_sdl.cpp"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\filesystem_sdl.hpp"
+			>
+		</File>
+		<File
 			RelativePath="..\..\src\game_config.cpp"
 			>
 		</File>

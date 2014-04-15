@@ -15,7 +15,7 @@
 #include "filesystem_sdl.hpp"
 
 #include "filesystem.hpp"
-#include <SDL/SDL_rwops.h>
+#include <SDL_rwops.h>
 
 namespace filesystem {
 RWops::RWops() :
