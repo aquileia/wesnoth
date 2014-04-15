@@ -28,9 +28,6 @@ RWops::RWops(const std::ostringstream &in) :
 	buffer_(new std::string(in.str())),
 	rwops_(SDL_RWFromConstMem(buffer_->data(), buffer_->size()))
 {
-	//const std::string tmp = in.str();
-	//buffer_ = boost::shared_array<char>(tmp.data(), length_);
-	//rwops_ = SDL_RWFromConstMem(buffer_.get(), length_);
 }
 
 RWops::RWops(const RWops &in) :
