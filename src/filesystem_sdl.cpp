@@ -18,6 +18,12 @@
 #include <SDL/SDL_rwops.h>
 
 namespace filesystem {
+RWops::RWops() :
+	buffer_(static_cast<std::string*>(NULL)),
+	rwops_(SDL_RWFromConstMem(NULL, 0))
+{
+}
+
 RWops::RWops(const std::ostringstream &in) :
 	buffer_(new std::string(in.str())),
 	rwops_(SDL_RWFromConstMem(buffer_->data(), buffer_->size()))
@@ -45,10 +51,10 @@ SDL_RWops* RWops::operator*() {
 
 RWops::~RWops() {
 	if(buffer_.unique())
-		SDL_FreeRW(rwops_);
+		SDL_RWclose(rwops_);
 }
 
-RWops load_RWops(const std::string &path) {
+RWops RWops::open_mem(const std::string &path) {
 	scoped_istream ifs = istream_file(path);
 	std::ostringstream oss;
 	const int bufsize = 4096;
@@ -59,5 +65,64 @@ RWops load_RWops(const std::string &path) {
 		oss.write(buf, count);
 	} while(*ifs);
 	return RWops(oss);
+}
+
+static int SDLCALL ifs_seek(struct SDL_RWops *context, int offset, int whence);
+static int SDLCALL ifs_read(struct SDL_RWops *context, void *ptr, int size, int maxnum);
+static int SDLCALL ifs_write(struct SDL_RWops *context, const void *ptr, int size, int num);
+static int SDLCALL ifs_close(struct SDL_RWops *context);
+
+RWops RWops::open_stream(const std::string &path) {
+	SDL_RWops *rw = SDL_AllocRW();
+	RWops wrap = RWops();
+	wrap.rwops_ = rw;
+	rw->seek = &ifs_seek;
+	rw->read = &ifs_read;
+	rw->write = &ifs_write;
+	rw->close = &ifs_close;
+
+	rw->hidden.unknown.data1 = istream_file(path);
+
+	return wrap;
+}
+
+static int SDLCALL ifs_seek(struct SDL_RWops *context, int offset, int whence) {
+	std::ios_base::seekdir seekdir;
+	switch(whence){
+	case RW_SEEK_SET:
+		seekdir = std::ios_base::beg;
+		break;
+	case RW_SEEK_CUR:
+		seekdir = std::ios_base::cur;
+		break;
+	case RW_SEEK_END:
+		seekdir = std::ios_base::end;
+		break;
+	default:
+		assert(false);
+	}
+	return static_cast<std::istream*>(context->hidden.unknown.data1)->seekg(offset, seekdir).tellg();
+}
+static int SDLCALL ifs_read(struct SDL_RWops *context, void *ptr, int size, int maxnum) {
+	std::istream *ifs = static_cast<std::istream*>(context->hidden.unknown.data1);
+	std::streamsize pos = ifs->tellg();
+	ifs->seekg(maxnum * size, std::ios_base::cur);
+	std::streamsize num = ((ifs->tellg() - pos)/size);
+
+	ifs->seekg(pos, std::ios_base::beg);
+	ifs->read(static_cast<char*>(ptr), num * size);
+	return num;
+}
+static int SDLCALL ifs_write(struct SDL_RWops * /*context*/, const void * /*ptr*/, int /*size*/, int /*num*/) {
+	SDL_SetError("Writing not implemented");
+	return 0;
+}
+static int SDLCALL ifs_close(struct SDL_RWops *context) {
+	if (context) {
+		std::istream *ifs = static_cast<std::istream*>(context->hidden.unknown.data1);
+		delete ifs;
+		SDL_FreeRW(context);
+	}
+	return 0;
 }
 }

@@ -493,7 +493,7 @@ static void play_new_music()
 		LOG_AUDIO << "attempting to insert track '" << filename << "' into cache\n";
 		// We need to hold on to the actual rw->rwops object
 		// LoadMUS (and OpenFont) hold on to the rw object internally
-		filesystem::RWops rw = filesystem::load_RWops(filename);
+		filesystem::RWops rw = filesystem::RWops::open_stream(filename);
 		Mix_Music* const music = Mix_LoadMUS_RW(*rw);
 		if(music == NULL) {
 			ERR_AUDIO << "Could not load music file '" << filename << "': "
@@ -716,7 +716,7 @@ static Mix_Chunk* load_chunk(const std::string& file, channel_group group)
 		std::string const &filename = get_binary_file_location("sounds", file);
 
 		if (!filename.empty()) {
-			filesystem::RWops rw = filesystem::load_RWops(filename);
+			filesystem::RWops rw = filesystem::RWops::open_mem(filename);
 			temp_chunk.set_data(Mix_LoadWAV_RW(*rw, false)); // don't free
 		} else {
 			ERR_AUDIO << "Could not load sound file '" << file << "'.\n";

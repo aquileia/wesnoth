@@ -29,7 +29,7 @@ struct SDL_RWops;
 namespace filesystem {
 	class RWops {
 	public:
-		RWops(const std::ostringstream &);
+		explicit RWops();
 		RWops(const RWops&);
 		RWops& operator=(const RWops&);
 		// RWops remains owner of the internal structure
@@ -37,12 +37,15 @@ namespace filesystem {
 		SDL_RWops* operator*();
 		~RWops();
 	private:
+		RWops(const std::ostringstream &);
 
 		boost::shared_ptr<std::string> buffer_;
 		SDL_RWops *rwops_;
-	};
 
-	RWops load_RWops(const std::string &path);
+	public:
+		static RWops open_stream(const std::string &path);
+		static RWops open_mem(const std::string &path);
+	};
 }
 
 #endif

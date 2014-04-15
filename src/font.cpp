@@ -213,7 +213,7 @@ static font_pod open_font(const std::string& fname, int size)
 				name = fname;
 				if(!file_exists(name)) {
 					ERR_FT << "Failed opening font: '" << name << "': No such file or directory\n";
-					return font_pod(NULL, filesystem::RWops(std::ostringstream()));
+					return font_pod();
 				}
 			}
 		}
@@ -223,13 +223,13 @@ static font_pod open_font(const std::string& fname, int size)
 		if(!file_exists(name)) {
 			if(!file_exists(fname)) {
 				ERR_FT << "Failed opening font: '" << name << "': No such file or directory\n";
-				return font_pod(NULL, filesystem::RWops(std::ostringstream()));
+				return font_pod();
 			}
 			name = fname;
 		}
 	}
 
-	filesystem::RWops rw = filesystem::load_RWops(name);
+	filesystem::RWops rw = filesystem::RWops::open_stream(name);
 	TTF_Font* font = TTF_OpenFontRW(*rw, false, size); // don't close
 	if(font == NULL) {
 		ERR_FT << "Failed opening font: TTF_OpenFont: " << TTF_GetError() << "\n";
