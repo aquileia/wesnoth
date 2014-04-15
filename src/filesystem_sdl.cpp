@@ -98,7 +98,10 @@ static int SDLCALL ifs_seek(struct SDL_RWops *context, int offset, int whence) {
 	default:
 		assert(false);
 	}
-	return static_cast<std::istream*>(context->hidden.unknown.data1)->seekg(offset, seekdir).tellg();
+	std::istream *ifs = static_cast<std::istream*>(context->hidden.unknown.data1);
+	ifs->seekg(offset, seekdir);
+	std::streamsize pos = ifs->tellg();
+	return static_cast<int>(pos);
 }
 static int SDLCALL ifs_read(struct SDL_RWops *context, void *ptr, int size, int maxnum) {
 	std::istream *ifs = static_cast<std::istream*>(context->hidden.unknown.data1);
@@ -108,7 +111,7 @@ static int SDLCALL ifs_read(struct SDL_RWops *context, void *ptr, int size, int 
 
 	ifs->seekg(pos, std::ios_base::beg);
 	ifs->read(static_cast<char*>(ptr), num * size);
-	return num;
+	return static_cast<int>(num);
 }
 static int SDLCALL ifs_write(struct SDL_RWops * /*context*/, const void * /*ptr*/, int /*size*/, int /*num*/) {
 	SDL_SetError("Writing not implemented");
