@@ -439,7 +439,7 @@ static std::string get_localized_path (const std::string& file, const std::strin
 static void add_localized_overlay (const std::string& ovr_file, surface &orig_surf)
 {
 	filesystem::RWops rw = filesystem::RWops::open_mem(ovr_file);
-	surface ovr_surf = IMG_Load_RW(*rw, false); // don't free
+	surface ovr_surf = IMG_Load_RW(*rw, true); // do free
 	if (ovr_surf.null()) {
 		return;
 	}
@@ -466,7 +466,7 @@ surface locator::load_image_file() const
 				location = loc_location;
 			}
 			filesystem::RWops rw = filesystem::RWops::open_mem(location);
-			res = IMG_Load_RW(*rw, false); // don't free
+			res = IMG_Load_RW(*rw, true); // do free
 			// If there was no standalone localized image, check if there is an overlay.
 			if (!res.null() && loc_location.empty()) {
 				const std::string ovr_location = get_localized_path(location, "--overlay");

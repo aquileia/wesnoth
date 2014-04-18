@@ -230,7 +230,7 @@ static font_pod open_font(const std::string& fname, int size)
 	}
 
 	filesystem::RWops rw = filesystem::RWops::open_stream(name);
-	TTF_Font* font = TTF_OpenFontRW(*rw, false, size); // don't close
+	TTF_Font* font = TTF_OpenFontRW(*rw, true, size); // do close
 	if(font == NULL) {
 		ERR_FT << "Failed opening font: TTF_OpenFont: " << TTF_GetError() << "\n";
 		return font_pod(NULL, rw);

@@ -47,8 +47,6 @@ SDL_RWops* RWops::operator*() {
 }
 
 RWops::~RWops() {
-	if(buffer_.unique())
-		SDL_RWclose(rwops_);
 }
 
 RWops RWops::open_mem(const std::string &path) {

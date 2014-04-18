@@ -494,7 +494,7 @@ static void play_new_music()
 		// We need to hold on to the actual rw->rwops object
 		// LoadMUS (and OpenFont) hold on to the rw object internally
 		filesystem::RWops rw = filesystem::RWops::open_stream(filename);
-		Mix_Music* const music = Mix_LoadMUS_RW(*rw);
+		Mix_Music* const music = Mix_LoadMUS_RW(*rw); // Always frees
 		if(music == NULL) {
 			ERR_AUDIO << "Could not load music file '" << filename << "': "
 					  << Mix_GetError() << "\n";
@@ -717,7 +717,7 @@ static Mix_Chunk* load_chunk(const std::string& file, channel_group group)
 
 		if (!filename.empty()) {
 			filesystem::RWops rw = filesystem::RWops::open_mem(filename);
-			temp_chunk.set_data(Mix_LoadWAV_RW(*rw, false)); // don't free
+			temp_chunk.set_data(Mix_LoadWAV_RW(*rw, true)); // do free
 		} else {
 			ERR_AUDIO << "Could not load sound file '" << file << "'.\n";
 			throw chunk_load_exception();
