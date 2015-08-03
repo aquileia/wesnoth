@@ -1,8 +1,34 @@
 language: cpp
+sudo:     false
 
 compiler:
     - gcc
     - clang
+
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    - boost-latest
+    packages:
+    - g++-4.8
+    - libboost-filesystem1.55-dev
+    - libboost-iostreams1.55-dev
+    - libboost-locale1.55-dev
+    - libboost-program-options1.55-dev
+    - libboost-random1.55-dev
+    - libboost-regex1.55-dev
+    - libboost-system1.55-dev
+    - libboost-test1.55-dev
+    - libcairo2-dev
+    - libfribidi-dev
+    - libpango1.0-dev
+    - libsdl-image1.2-dev
+    - libsdl-mixer1.2-dev
+    - libsdl-net1.2-dev
+    - libsdl-ttf2.0-dev
+    - gdb
+    - moreutils
 
 env:
     - BUILD="-O0"
@@ -48,10 +74,10 @@ before_install:
     - if [ "$BUILD" == "translations" ]; then export MP_TEST=false; fi
 
 install:
-    - sudo add-apt-repository -y "deb http://old-releases.ubuntu.com/ubuntu/ saucy main universe"
-    - travis_wait sudo apt-get update -qq
-    - travis_wait sudo apt-get install -qq libboost-filesystem-dev libboost-iostreams-dev libboost-random-dev libboost-program-options-dev libboost-regex-dev libboost-system-dev libboost-test-dev libboost-locale-dev libcairo2-dev libfribidi-dev libpango1.0-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-net1.2-dev libsdl-ttf2.0-dev gdb moreutils
-    - if [ "$CXX" = "g++" ]; then travis_wait sudo apt-get -qq install g++-4.8; fi
+#    - sudo add-apt-repository -y "deb http://old-releases.ubuntu.com/ubuntu/ saucy main universe"
+#    - travis_wait sudo apt-get update -qq
+#    - travis_wait sudo apt-get install -qq libboost-filesystem-dev libboost-iostreams-dev libboost-random-dev libboost-program-options-dev libboost-regex-dev libboost-system-dev libboost-test-dev libboost-locale-dev libcairo2-dev libfribidi-dev libpango1.0-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-net1.2-dev libsdl-ttf2.0-dev gdb moreutils
+#    - if [ "$CXX" = "g++" ]; then travis_wait sudo apt-get -qq install g++-4.8; fi
     - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8"; fi
 #    - if [ "$CPP_TESTS" = true ]; then sudo update-alternatives --remove postmaster.1.gz /usr/share/postgresql/9.1/man/man1/postmaster.1.gz; fi
 #    - if [ "$CPP_TESTS" = true ]; then sudo apt-get -f; fi
