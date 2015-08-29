@@ -1,8 +1,5 @@
 language: cpp
-sudo:     required
-
-services:
-    - docker
+sudo:     9000
 
 compiler:
     - gcc
@@ -30,6 +27,7 @@ addons:
     - libsdl-ttf2.0-dev
     - gdb
     - moreutils
+    - scons
 
 env:
     - BUILD="-O0"
