@@ -1,5 +1,5 @@
 language: cpp
-sudo:     9000
+sudo:     required
 
 compiler:
     - gcc
