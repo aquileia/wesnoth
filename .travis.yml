@@ -63,14 +63,13 @@ before_install:
     - if [ "$BUILD" == "translations" ]; then export MP_TEST=false; fi
 
 script:
-    - cat /etc/init.d/xvfb
     - ./utils/travis/check_utf8.sh
     - ./utils/travis/utf8_bom_dog.sh
     - $CXX -v
     - echo "*Params* --- " "cxxtool=$CXX --debug=time build=release extra_flags_release="$EXTRA_FLAGS_RELEASE" strict=$STRICT_COMPILATION $TARGETS cxx0x=$CXX11 nls=$NLS jobs=2"
     - scons cxxtool=$CXX --debug=time build=release extra_flags_config="$EXTRA_FLAGS_ALL" extra_flags_release="$EXTRA_FLAGS_RELEASE" strict=$STRICT_COMPILATION $TARGETS cxx0x=$CXX11 nls=$NLS jobs=2
     - "export DISPLAY=:99.0"
-    - "sh -e /etc/init.d/xvfb start"
+    - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1024x768x24"
     - if [ "$CPP_TESTS" = true ]; then ./utils/travis/test_wrapper.sh; fi
     - if [ "$WML_TESTS" = true ]; then ./run_wml_tests -g -v -c -t "$WML_TEST_TIME"; fi
     - if [ "$PLAY_TEST" = true ]; then ./utils/travis/play_test_executor.sh; fi
