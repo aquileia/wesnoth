@@ -30,7 +30,7 @@ addons:
     - gdb
     - moreutils
     - scons
-    - xvfb
+#   - xvfb
 
 before_install:
     - export TARGETS="wesnoth wesnothd campaignd test"
