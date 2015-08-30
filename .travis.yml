@@ -1,8 +1,6 @@
 language: cpp
-sudo:     9000
 
 compiler:
-    - gcc
     - clang
 
 addons:
@@ -31,17 +29,12 @@ addons:
     - xvfb
 
 env:
-    - BUILD="-O0"
     - BUILD="-O2"
-    - BUILD="C++11 -O0"
-    - BUILD="translations"
 
 matrix:
-  exclude:
-    - compiler: gcc
-      env: BUILD="-O2"
-    - compiler: gcc
-      env: BUILD="translations"
+  include:
+    - sudo: false
+    - sudo: 9000
 
 before_install:
     - export TARGETS="wesnoth wesnothd campaignd test"
@@ -73,7 +66,8 @@ before_install:
     - if [ "$BUILD" == "translations" ]; then export PLAY_TEST=false; fi
     - if [ "$BUILD" == "translations" ]; then export MP_TEST=false; fi
 
-script: 
+script:
+    - ls -l /etc/init.d
     - ./utils/travis/check_utf8.sh
     - ./utils/travis/utf8_bom_dog.sh
     - $CXX -v
