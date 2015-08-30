@@ -28,6 +28,7 @@ addons:
     - gdb
     - moreutils
     - scons
+    - xvfb
 
 env:
     - BUILD="-O0"
