@@ -1,7 +1,11 @@
 language: cpp
+compiler: clang
+env:      BUILD="-O2"
 
-compiler:
-    - clang
+matrix:
+  include:
+    - sudo: false
+    - sudo: 9000
 
 addons:
   apt:
@@ -27,14 +31,6 @@ addons:
     - moreutils
     - scons
     - xvfb
-
-env:
-    - BUILD="-O2"
-
-matrix:
-  include:
-    - sudo: false
-    - sudo: 9000
 
 before_install:
     - export TARGETS="wesnoth wesnothd campaignd test"
@@ -67,7 +63,7 @@ before_install:
     - if [ "$BUILD" == "translations" ]; then export MP_TEST=false; fi
 
 script:
-    - ls -l /etc/init.d
+    - cat /etc/init.d/xvfb
     - ./utils/travis/check_utf8.sh
     - ./utils/travis/utf8_bom_dog.sh
     - $CXX -v
@@ -93,4 +89,4 @@ notifications:
             - "\x02%{repository}\x0f#\x0312%{build_number}\x0f (\x0307%{branch}\x0f - \x02%{commit}\x0f : \x0303%{author}\x0f): \x02%{message}\x0f"
             - "Build details : \x0302%{build_url}\x0f"
         on_success: change
-        on_failure: always
+        on_failure: never
