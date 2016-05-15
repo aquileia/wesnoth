@@ -27,8 +27,9 @@ Version 1.13.5+dev:
  * Graphics:
    * Improved or new terrain graphics: New wooden floor variation and new
      transitions.  New aquatic encampment.
-   * New sprite for Tentacle of the Deep.
+   * New sprite for Tentacle of the Deep and Swordsman.
    * Tweaked colors for all time schedules.
+   * Added standing and movement animations for Lancer.
  * Units:
    * Changed the sound for the melee attack of the
      Loyalist Bowman, Orcish Crossbowman and Orcish Slurbow.

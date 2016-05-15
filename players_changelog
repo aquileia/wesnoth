@@ -24,8 +24,9 @@ Version 1.13.5+dev:
      * S22 ('Return to Wesnoth') Under certain conditions, Gryphons will appear to assist
        Konrad.
  * Graphics:
-   * New sprite for Tentacle of the Deep.
+   * New sprite for Tentacle of the Deep and Swordsman.
    * Tweaked colors for all time schedules.
+   * Added standing and movement animations for Lancer.
  * Music and sound effects:
    * Added a preference to pause the music when the game loses focus.
    * Now the music fades out between scenarios.
@@ -51,6 +52,9 @@ Version 1.13.5:
      * New sprites for Li'sar.
      * S10: Clarify objectives and change egg image on capture.
      * S19c: Removed the undead and the swamps.
+
+ * Graphics:
+   * Updated generic portrait of Mermaid Initiate.
 
  * Language and i18n:
    * Updated translations: British English, Galician, German, Italian, Japanese,
